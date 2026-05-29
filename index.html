@@ -334,19 +334,13 @@ body{background:var(--bg);color:var(--tx);font-family:var(--sans);font-size:14px
 <!-- DASHBOARD -->
 <div id="page-dashboard" class="page active">
   <div class="ph"><div><div class="pt">Dashboard</div><div class="ps" id="dash-date"></div></div><button class="btn btn-ac" onclick="showPage('log')">+ Log Trade</button></div>
-  <div class="stats-row">
+  <div class="stats-row" style="grid-template-columns:repeat(2,1fr);">
     <div class="stat-card"><div class="stat-lbl">Total P&L</div><div class="stat-val" id="s-pnl">$0</div><div class="stat-sub" id="s-pnl-sub">No trades yet</div></div>
     <div class="stat-card"><div class="stat-lbl">Win Rate</div><div class="stat-val" id="s-wr">0%</div><div class="stat-sub" id="s-wr-sub">0W / 0L</div></div>
     <div class="stat-card"><div class="stat-lbl">Avg R:R</div><div class="stat-val" id="s-rr">0.00</div><div class="stat-sub">All trades</div></div>
-    <div class="stat-card"><div class="stat-lbl">Avg AI Score</div><div class="stat-val" id="s-sc">—</div><div class="stat-sub">Trade quality</div></div>
+    
   </div>
-  <div class="card" id="news-banner" style="padding:12px 16px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
-      <div style="font-size:11px;color:var(--mt);text-transform:uppercase;letter-spacing:0.08em;">Today's High-Impact News</div>
-      <button class="btn btn-sm" onclick="showPage('news')">Full Calendar</button>
-    </div>
-    <div id="news-banner-items" style="display:flex;gap:8px;flex-wrap:wrap;"><span style="font-size:12px;color:var(--mt);">Loading...</span></div>
-  </div>
+
   <div class="card"><div class="card-t">Equity Curve</div><canvas id="eq-chart" height="110" style="display:none;"></canvas><div id="eq-empty" class="empty" style="padding:16px 0;">Log trades to see your equity curve</div></div>
   <div class="card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
@@ -441,10 +435,10 @@ body{background:var(--bg);color:var(--tx);font-family:var(--sans);font-size:14px
     </div>
     <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end;flex-wrap:wrap;">
       <button class="btn" onclick="clearForm()">Clear</button>
-      <button class="btn btn-ac" onclick="logTrade()">Log and Rate with AI</button>
+      <button class="btn btn-ac" onclick="logTrade()">Save Trade</button>
     </div>
-    <div class="ai-load" id="ai-load"><div class="ld"><div class="ld-dot"></div><div class="ld-dot"></div><div class="ld-dot"></div></div><span class="ld-txt">Marcus is rating your trade...</span></div>
-    <div id="feedback-area"></div>
+    
+    
   </div>
 </div>
 
@@ -481,7 +475,7 @@ body{background:var(--bg);color:var(--tx);font-family:var(--sans);font-size:14px
     <div class="chart-card"><div class="card-t">Win / Loss / BE</div><div class="donut-wrap"><canvas id="donut-chart" width="95" height="95"></canvas><div id="donut-leg" style="flex:1;"></div></div></div>
   </div>
   <div class="card"><div class="card-t">Per Instrument</div><table class="data-table"><thead><tr><th>Pair</th><th>Trades</th><th>Win%</th><th>Net P&L</th><th>Avg R:R</th><th>Best</th><th>Worst</th></tr></thead><tbody id="inst-body"></tbody></table></div>
-  <div class="card"><div class="card-t">Per Session</div><table class="data-table"><thead><tr><th>Session</th><th>Trades</th><th>Win%</th><th>Net P&L</th><th>Avg Score</th></tr></thead><tbody id="sess-body"></tbody></table></div>
+  <div class="card"><div class="card-t">Per Session</div><table class="data-table"><thead><tr><th>Session</th><th>Trades</th><th>Win%</th><th>Net P&L</th></tr></thead><tbody id="sess-body"></tbody></table></div>
   <div class="card"><div class="card-t">Emotion vs Performance</div><table class="data-table"><thead><tr><th>Emotion</th><th>Trades</th><th>Win%</th><th>Net P&L</th><th>Verdict</th></tr></thead><tbody id="emo-body"></tbody></table></div>
   <div class="card"><div class="card-t">P&L Heatmap — Last 30 Days</div><div class="heatmap-grid" id="heatmap" style="margin-top:8px;"></div><div style="display:flex;gap:8px;align-items:center;margin-top:10px;font-size:11px;color:var(--mt);"><div style="width:10px;height:10px;border-radius:2px;background:var(--s3);"></div>No trade<div style="width:10px;height:10px;border-radius:2px;background:rgba(34,211,160,0.5);"></div>Win<div style="width:10px;height:10px;border-radius:2px;background:rgba(240,82,82,0.5);"></div>Loss<div style="width:10px;height:10px;border-radius:2px;background:rgba(245,166,35,0.4);"></div>BE</div></div>
 </div>
@@ -492,21 +486,17 @@ body{background:var(--bg);color:var(--tx);font-family:var(--sans);font-size:14px
   <div class="stats-row" style="grid-template-columns:repeat(3,1fr);">
     <div class="stat-card" style="text-align:center;"><div class="stat-lbl">Win Streak</div><div class="stat-val" id="win-streak" style="font-size:36px;color:var(--win);">0</div><div class="stat-sub">consecutive</div></div>
     <div class="stat-card" style="text-align:center;"><div class="stat-lbl">Best Streak</div><div class="stat-val" id="best-streak" style="font-size:36px;">0</div><div class="stat-sub">all-time</div></div>
-    <div class="stat-card" style="text-align:center;"><div class="stat-lbl">Avg AI Score</div><div class="stat-val" id="avg-sc" style="font-size:36px;color:var(--ac);">—</div><div class="stat-sub">quality</div></div>
+  
   </div>
   <div class="card">
     <div class="card-t">Today's Session</div>
     <div id="today-session-stats"></div>
   </div>
-  <div class="card"><div class="card-t">AI Score History (last 20 trades)</div><canvas id="score-chart" height="80"></canvas></div>
+
 </div>
 
 <!-- WEEKLY AI -->
-<div id="page-weekly" class="page">
-  <div class="ph"><div><div class="pt">Weekly AI Report</div><div class="ps">Marcus analyses your full journal</div></div><button class="btn btn-ac" onclick="genWeekly()">Generate Report</button></div>
-  <div class="ai-load" id="weekly-load" style="margin-bottom:14px;"><div class="ld"><div class="ld-dot"></div><div class="ld-dot"></div><div class="ld-dot"></div></div><span class="ld-txt">Marcus is reviewing your week...</span></div>
-  <div id="weekly-content"><div class="empty" style="padding:50px 20px;">Click Generate Report to get your weekly analysis from Marcus</div></div>
-</div>
+
 
 <!-- STRATEGIES -->
 <div id="page-strategy" class="page">
@@ -544,89 +534,10 @@ body{background:var(--bg);color:var(--tx);font-family:var(--sans);font-size:14px
 </div>
 
 <!-- RAW TO PRO -->
-<div id="page-converter" class="page">
-  <div class="ph"><div><div class="pt">Raw to Pro Notes</div><div class="ps">Type exactly how you feel. AI converts it to professional trading language.</div></div></div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
-    <div>
-      <div class="card">
-        <div class="card-t">Your raw thoughts</div>
-        <div style="font-size:12px;color:var(--mt);margin-bottom:10px;line-height:1.6;">Write exactly how you feel — messy English, slang, emotions. Don't filter yourself.</div>
-        <textarea class="fta" id="raw-input" style="min-height:130px;" placeholder="e.g. i saw the setup but froze up then fomo'd in after it already moved, entry was trash, got stopped out immediately felt like an idiot..."></textarea>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;">
-          <button class="btn btn-ac" onclick="convertRaw('journal')" style="flex:1;">Full Journal Entry</button>
-          <button class="btn" onclick="convertRaw('analysis')" style="flex:1;">Trade Analysis</button>
-        </div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">
-          <button class="btn btn-sm" onclick="convertRaw('emotion')">Emotions Only</button>
-          <button class="btn btn-sm" onclick="convertRaw('execution')">Execution Only</button>
-          <button class="btn btn-sm" onclick="convertRaw('understanding')">Market Read</button>
-          <button class="btn btn-sm" onclick="convertRaw('lesson')">Lesson Learned</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-t">Example</div>
-        <div style="font-size:11px;color:var(--mt);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">You type</div>
-        <div style="font-size:12px;color:var(--mt2);font-style:italic;padding:8px;background:var(--s2);border-radius:6px;margin-bottom:10px;">"i was shaking when i clicked, knew it was wrong but did it anyway"</div>
-        <div style="font-size:11px;color:var(--ac);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">Becomes</div>
-        <div style="font-size:12px;color:var(--mt2);padding:8px;background:rgba(200,255,0,0.03);border:1px solid rgba(200,255,0,0.1);border-radius:6px;line-height:1.7;">Emotional State: Heightened anxiety at point of entry. Physical stress indicators present. Cognitive override of internal risk signal — proceeded with execution despite negative pre-trade assessment.</div>
-      </div>
-    </div>
-    <div class="card" style="min-height:380px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div class="card-t" style="margin-bottom:0;">Professional Output</div>
-        <button class="btn btn-sm" id="copy-btn" style="display:none;" onclick="copyOutput()">Copy</button>
-      </div>
-      <div class="ai-load" id="conv-load"><div class="ld"><div class="ld-dot"></div><div class="ld-dot"></div><div class="ld-dot"></div></div><span class="ld-txt">Converting your thoughts...</span></div>
-      <div id="raw-output"><div class="empty">Your professional output will appear here.</div></div>
-    </div>
-  </div>
-</div>
+
 
 <!-- AI MENTOR -->
-<div id="page-mentor" class="page">
-  <div class="ph">
-    <div><div class="pt">AI Mentor — Marcus</div><div class="ps">Upload a chart or ask anything. Real data. No sugarcoating.</div></div>
-    <button class="btn btn-sm" onclick="clearMentor()">New Session</button>
-  </div>
-  <div class="card" style="margin-bottom:14px;min-height:320px;display:flex;flex-direction:column;">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--bd);">
-      <div class="ai-dot"></div>
-      <span style="font-family:var(--mono);font-size:12px;color:var(--ac);font-weight:700;">MARCUS — AI TRADING MENTOR</span>
-    </div>
-    <div class="ai-load" id="mentor-load"><div class="ld"><div class="ld-dot"></div><div class="ld-dot"></div><div class="ld-dot"></div></div><span class="ld-txt">Marcus is thinking...</span></div>
-    <div id="mentor-chat" style="flex:1;overflow-y:auto;max-height:380px;padding-right:4px;">
-      <div class="empty" style="padding:30px 0;">Ask anything — trading data, chart analysis, psychology, hi hello.<br><span style="font-size:11px;color:var(--mt);">Upload a chart and Marcus reads the structure too.</span></div>
-    </div>
-  </div>
-  <div class="card" style="margin-bottom:14px;">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--bd);flex-wrap:wrap;">
-      <div id="mentor-chart-thumb" style="display:none;position:relative;">
-        <img id="mentor-chart-img" style="width:60px;height:44px;object-fit:cover;border-radius:6px;border:1px solid var(--bd2);" alt="">
-        <button onclick="removeMentorChart()" style="position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;background:var(--loss);border:none;color:#fff;font-size:9px;cursor:pointer;line-height:1;">x</button>
-      </div>
-      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:7px 12px;border:1px solid var(--bd);border-radius:8px;font-size:12px;color:var(--mt2);background:var(--s2);">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
-        Upload Chart
-        <input type="file" id="mentor-chart-file" accept="image/*" style="display:none;" onchange="handleMentorChart(this)">
-      </label>
-      <span style="font-size:11px;color:var(--mt);">Upload any chart — Marcus reads market structure</span>
-    </div>
-    <textarea class="fta" id="mentor-q" style="min-height:72px;margin-bottom:10px;" placeholder="Ask anything — chart structure, order blocks, liquidity, your trading data, or just say hi..."></textarea>
-    <button class="btn btn-ac" style="width:100%;" onclick="askMentor()">Ask Marcus</button>
-  </div>
-  <div class="card">
-    <div class="card-t">Quick Deep-Dives</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-      <button class="btn" style="text-align:left;font-size:12px;" onclick="mQuick('strengths')">My real strengths?</button>
-      <button class="btn" style="text-align:left;font-size:12px;" onclick="mQuick('weaknesses')">Where am I leaking money?</button>
-      <button class="btn" style="text-align:left;font-size:12px;" onclick="mQuick('mistakes')">My costliest mistakes?</button>
-      <button class="btn" style="text-align:left;font-size:12px;" onclick="mQuick('plan')">30-day improvement plan</button>
-      <button class="btn" style="text-align:left;font-size:12px;" onclick="mQuick('psychology')">My psychology issues?</button>
-      <button class="btn" style="text-align:left;font-size:12px;" onclick="mQuick('strategy')">Which strategy to drop?</button>
-      <button class="btn" style="text-align:left;font-size:12px;grid-column:1/-1;" onclick="mQuick('full')">Full performance review</button>
-    </div>
-  </div>
-</div>
+
 
 <!-- RISK CALC -->
 <div id="page-risk" class="page">
@@ -651,11 +562,7 @@ body{background:var(--bg);color:var(--tx);font-family:var(--sans);font-size:14px
 </div>
 
 <!-- NEWS -->
-<div id="page-news" class="page">
-  <div class="ph"><div><div class="pt">News Calendar</div><div class="ps">High-impact events — stay out during these</div></div><button class="btn btn-ac" onclick="loadNews()">Refresh</button></div>
-  <div class="ai-load" id="news-load" style="margin-bottom:14px;"><div class="ld"><div class="ld-dot"></div><div class="ld-dot"></div><div class="ld-dot"></div></div><span class="ld-txt">Fetching economic calendar...</span></div>
-  <div id="news-content"><div class="empty">Click Refresh to load today's news events</div></div>
-</div>
+
 
 
 <!-- DRAWDOWN ALERT (fixed overlay) -->
@@ -717,79 +624,7 @@ body{background:var(--bg);color:var(--tx);font-family:var(--sans);font-size:14px
 </div>
 
 <!-- CHART ANALYST -->
-<div id="page-chartqa" class="page">
-  <div class="ph">
-    <div>
-      <div class="pt">Chart Analyst</div>
-      <div class="ps">Upload your chart. Ask anything. Get ICT-level structural analysis — no emotion, no bias.</div>
-    </div>
-    <button class="btn btn-sm" onclick="clearChartSession()">Clear Session</button>
-  </div>
 
-  <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:20px;align-items:start;">
-
-    <!-- LEFT: Upload + Question -->
-    <div>
-      <div class="card" style="margin-bottom:14px;">
-        <div class="card-t">Upload Chart</div>
-        <div class="chart-upload-zone" id="chart-drop-zone" onclick="document.getElementById('chart-file').click()">
-          <input type="file" id="chart-file" accept="image/*" onchange="handleChartUpload(this)">
-          <svg width="32" height="32" fill="none" stroke="var(--mt)" stroke-width="1.2" viewBox="0 0 24 24" style="margin:0 auto 10px;display:block;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
-          <div style="font-size:13px;color:var(--mt2);font-weight:500;">Drop your chart here or click to upload</div>
-          <div style="font-size:11px;color:var(--mt);margin-top:5px;">Works with any screenshot — TradingView, MT4, MT5</div>
-          <img id="chart-preview" class="chart-preview" alt="Chart preview">
-        </div>
-        <div id="chart-info" style="margin-top:10px;display:none;">
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-            <select class="fs" id="chart-pair" style="flex:1;padding:7px 10px;"><option value="">Pair (optional)</option><option>XAUUSD</option><option>EURUSD</option><option>GBPUSD</option><option>USDJPY</option><option>NAS100</option><option>US30</option><option>BTCUSD</option></select>
-            <select class="fs" id="chart-tf" style="flex:1;padding:7px 10px;"><option value="">Timeframe</option><option>1M</option><option>5M</option><option>15M</option><option>1H</option><option>4H</option><option>Daily</option><option>Weekly</option></select>
-          </div>
-          <div style="font-size:11px;color:var(--win);padding:7px 10px;background:rgba(34,211,160,0.07);border-radius:7px;border:1px solid rgba(34,211,160,0.2);">Chart uploaded. Ask your question below.</div>
-        </div>
-      </div>
-
-      <div class="card" style="margin-bottom:14px;">
-        <div class="card-t">Ask the Analyst</div>
-        <textarea class="fta" id="chart-question" style="min-height:80px;" placeholder="e.g. Where are the high probability order blocks? Is there a FVG I should watch? Will price return to this level before pushing higher?"></textarea>
-        <button class="btn btn-ac" style="width:100%;margin-top:10px;" onclick="askChartAnalyst()">Analyse Chart</button>
-        <div class="ai-load" id="chart-ai-load" style="margin-top:10px;"><div class="ld"><div class="ld-dot"></div><div class="ld-dot"></div><div class="ld-dot"></div></div><span class="ld-txt">Reading the chart structure...</span></div>
-      </div>
-
-      <div class="card">
-        <div class="card-t">Quick Questions</div>
-        <div id="chart-quick-btns">
-          <span class="qa-chip" onclick="chartQuick('full')">Full structure analysis</span>
-          <span class="qa-chip" onclick="chartQuick('ob')">Where are the order blocks?</span>
-          <span class="qa-chip" onclick="chartQuick('fvg')">Any FVGs to watch?</span>
-          <span class="qa-chip" onclick="chartQuick('bias')">What is the overall bias?</span>
-          <span class="qa-chip" onclick="chartQuick('entry')">Best entry zones?</span>
-          <span class="qa-chip" onclick="chartQuick('liquidity')">Where is liquidity resting?</span>
-          <span class="qa-chip" onclick="chartQuick('sl')">Where would you place SL?</span>
-          <span class="qa-chip" onclick="chartQuick('target')">What are the targets?</span>
-          <span class="qa-chip" onclick="chartQuick('retest')">Will price retest before continuing?</span>
-          <span class="qa-chip" onclick="chartQuick('structure')">Break of structure analysis</span>
-          <span class="qa-chip" onclick="chartQuick('avoid')">Reasons to avoid this trade?</span>
-          <span class="qa-chip" onclick="chartQuick('session')">Best session to trade this?</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- RIGHT: Chat -->
-    <div class="card" style="min-height:500px;max-height:80vh;display:flex;flex-direction:column;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--bd);">
-        <div class="ai-dot"></div>
-        <span style="font-family:var(--mono);font-size:12px;color:var(--ac);font-weight:700;">CHART ANALYST — ICT STRUCTURE READER</span>
-      </div>
-      <div id="chart-chat" style="flex:1;overflow-y:auto;padding-right:4px;">
-        <div style="text-align:center;padding:40px 20px;color:var(--mt);font-size:13px;line-height:1.8;">
-          Upload a chart and ask anything.<br>
-          <span style="font-size:11px;">The analyst reads market structure, order blocks, FVGs, liquidity, bias — like a senior ICT trader sitting next to you.</span>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</div>
 
 </main>
 </div>
@@ -866,7 +701,6 @@ onAuthStateChanged(auth, async u=>{
     document.getElementById('plan-date').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',day:'2-digit',month:'long'});
     await loadUserData();
     subTrades();
-    loadNews();
     } else {
     user=null;
     document.getElementById('auth-screen').style.display='flex';
@@ -969,16 +803,8 @@ window.logTrade = async()=>{
   const imgEl=document.getElementById('prev-img');
   const imgSrc=imgEl.src&&imgEl.src.startsWith('data:')?imgEl.src:'';
   if(!entry){toast('Please describe your entry logic','error');return;}
-  document.getElementById('ai-load').classList.add('show');
-  document.getElementById('feedback-area').innerHTML='';
-  const strat=strategies.find(s=>s.name===stratName);
-  let ai=null;
-  try{ai=await rateWithAI(pair,dir,outcome,pnl,rr,entry,mistakes,sess,selEmo,strat,selType);}
-  catch(e){ai={score:50,summary:'AI unavailable — trade logged.',fixes:['Check connection'],tags:{good:[],bad:[],warn:['No AI rating']},breakdown:{entry_quality:50,rr_discipline:50,risk_management:50,psychology:50,execution:50},similarity:'',strategy_adherence:50,strategy_note:''};}
-  document.getElementById('ai-load').classList.remove('show');
-  const t={id:Date.now(),pair,dir,outcome,pnl,rr,date,sess,emotion:selEmo,entry,mistakes,imgSrc,ai,timestamp:new Date().toISOString(),tradeType:selType,stratName};
+  const t={id:Date.now(),pair,dir,outcome,pnl,rr,date,sess,emotion:selEmo,entry,mistakes,imgSrc,timestamp:new Date().toISOString(),tradeType:selType,stratName};
   await saveTrade(t);
-  showFeedback(ai,t);
   clearForm();
 };
 
@@ -1018,7 +844,7 @@ function showFeedback(ai,trade){
 
 // ── TRADE CARD ──
 function tradeCard(t){
-  const sc=t.ai&&t.ai.score>=75?'var(--win)':t.ai&&t.ai.score>=50?'var(--be)':'var(--loss)';
+
   return `<div class="trade-card" onclick="openModal('${t.fid}')">
     <div class="tc-top">
       <div class="tc-meta">
@@ -1033,11 +859,11 @@ function tradeCard(t){
     </div>
     <div class="tc-body">
       <div><div class="td-l">R:R</div><div class="td-v">${t.rr||'—'}</div></div>
-      <div><div class="td-l">AI Score</div><div class="td-v" style="color:${sc}">${t.ai?t.ai.score:'—'}</div></div>
+
       <div><div class="td-l">Entry</div><div class="td-v" style="font-size:11px;color:var(--mt2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;">${t.entry.substring(0,40)}...</div></div>
       <div><div class="td-l">Chart</div><div class="td-v">${t.imgSrc?'Attached':'—'}</div></div>
     </div>
-    ${t.ai?`<div class="ai-bar"><span style="font-size:11px;color:var(--mt);">AI</span><div style="display:flex;gap:3px;">${[1,2,3,4,5].map(i=>`<div class="star ${t.ai.score>=i*20?'on':''}"></div>`).join('')}</div><span style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--ac);margin-left:3px;">${t.ai.score}/100</span><span class="ai-snip">${t.ai.summary?t.ai.summary.substring(0,55)+'...':''}</span></div>`:''}
+    
   </div>`;
 }
 
@@ -1060,7 +886,7 @@ function renderDash(){
   document.getElementById('s-wr').style.color=wr>=50?'var(--win)':'var(--loss)';
   document.getElementById('s-wr-sub').textContent=`${wins}W / ${losses}L`;
   document.getElementById('s-rr').textContent=avgRR;
-  document.getElementById('s-sc').textContent=avgSc!==null?avgSc:'—';
+
   // Equity
   const eqEmpty=document.getElementById('eq-empty');const eqCanvas=document.getElementById('eq-chart');
   if(trades.length<2){eqEmpty.style.display='block';eqCanvas.style.display='none';}
@@ -1134,10 +960,9 @@ function renderStats(){
     const w=t.filter(x=>x.outcome==='Win').length;
     const pnl=t.reduce((s2,x)=>s2+(x.pnl||0),0);
     const wr2=Math.round(w/t.length*100);
-    const scs=t.filter(x=>x.ai?.score).map(x=>x.ai.score);
-    const as=scs.length?Math.round(scs.reduce((a,b)=>a+b,0)/scs.length):'—';
+    const as='—';
     const pc=pnl>0?'var(--win)':pnl<0?'var(--loss)':'var(--mt)';
-    return `<tr><td>${sessBadge(s)}</td><td>${t.length}</td><td style="color:${wr2>=50?'var(--win)':'var(--loss)'}">${wr2}%</td><td style="color:${pc}">${pnl>=0?'+':''}$${pnl.toFixed(0)}</td><td style="color:var(--ac)">${as}</td></tr>`;
+    return `<tr><td>${sessBadge(s)}</td><td>${t.length}</td><td style="color:${wr2>=50?'var(--win)':'var(--loss)'}">${wr2}%</td><td style="color:${pc}">${pnl>=0?'+':''}$${pnl.toFixed(0)}</td></tr>`;
   }).filter(Boolean);
   sb.innerHTML=srows.length?srows.join(''):'<tr><td colspan="5" style="color:var(--mt);text-align:center;padding:16px;">No data yet</td></tr>';
   // Emotions
@@ -1235,9 +1060,7 @@ function renderStreak(){
   let best=0,tmp=0;[...trades].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(t=>{if(t.outcome==='Win'){tmp++;if(tmp>best)best=tmp;}else tmp=0;});
   document.getElementById('win-streak').textContent=cur;
   document.getElementById('best-streak').textContent=best;
-  const scs=trades.filter(t=>t.ai?.score).map(t=>t.ai.score);
-  const avgSc=scs.length?Math.round(scs.reduce((a,b)=>a+b,0)/scs.length):null;
-  document.getElementById('avg-sc').textContent=avgSc!==null?avgSc:'—';
+
   const recent=trades.filter(t=>t.ai?.score).slice(0,20).reverse();
   if(scoreChart)scoreChart.destroy();
   if(recent.length>1)scoreChart=new Chart(document.getElementById('score-chart'),{type:'line',data:{labels:recent.map(t=>t.pair),datasets:[{data:recent.map(t=>t.ai.score),borderColor:'#c8ff00',backgroundColor:'rgba(200,255,0,0.05)',tension:0.3,fill:true,pointRadius:4,pointBackgroundColor:recent.map(t=>t.ai.score>=70?'#22d3a0':t.ai.score>=50?'#f5a623':'#f05252')}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#6b6b80',font:{size:10}}},x:{ticks:{color:'#6b6b80',font:{size:10}},grid:{display:false}}}}});
@@ -1312,13 +1135,12 @@ function renderStratOverview(){
   const c2=document.getElementById('spnl-chart');
   if(c2)spnlChart=new Chart(c2,{type:'bar',data:{labels:sl2,datasets:[{data:sd2,backgroundColor:sd2.map(v=>v>=0?'rgba(34,211,160,0.5)':'rgba(240,82,82,0.5)'),borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#6b6b80',font:{size:9},maxRotation:20}},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#6b6b80',callback:v=>'$'+v}}}}});
   const rows=Object.entries(sm).sort((a,b)=>b[1].pnl-a[1].pnl);
-  const html=rows.length?`<table class="data-table"><thead><tr><th>Strategy</th><th>Trades</th><th>Win%</th><th>Total P&L</th><th>Avg P&L</th><th>Adherence</th><th>Verdict</th></tr></thead><tbody>${rows.map(([name,s])=>{
+  const html=rows.length?`<table class="data-table"><thead><tr><th>Strategy</th><th>Trades</th><th>Win%</th><th>Total P&L</th><th>Avg P&L</th><th>Verdict</th></tr></thead><tbody>${rows.map(([name,s])=>{
     const ts2=trades.filter(t=>t.stratName===name);
     const wr2=Math.round(ts2.filter(t=>t.outcome==='Win').length/ts2.length*100);
-    const adh2=ts2.filter(t=>t.ai?.strategy_adherence).map(t=>t.ai.strategy_adherence);
-    const aa=adh2.length?Math.round(adh2.reduce((a,b)=>a+b,0)/adh2.length):0;
+    const aa=0;
     const v=wr2>=55&&s.pnl>0?'<span class="tag good">Keep Trading</span>':wr2>=40&&s.pnl>=0?'<span class="tag warn">Monitor</span>':'<span class="tag bad">Review / Drop</span>';
-    return `<tr><td style="font-weight:600">${name}</td><td>${s.n}</td><td style="color:${wr2>=50?'var(--win)':'var(--loss)'}">${wr2}%</td><td style="font-family:var(--mono);color:${s.pnl>=0?'var(--win)':'var(--loss)'}">${s.pnl>=0?'+':''}$${s.pnl.toFixed(0)}</td><td style="font-family:var(--mono);color:${s.pnl/s.n>=0?'var(--win)':'var(--loss)'}">$${(s.pnl/s.n).toFixed(0)}</td><td style="color:${aa>=70?'var(--win)':aa>=50?'var(--be)':'var(--loss)'}">${aa}%</td><td>${v}</td></tr>`;
+    return `<tr><td style="font-weight:600">${name}</td><td>${s.n}</td><td style="color:${wr2>=50?'var(--win)':'var(--loss)'}">${wr2}%</td><td style="font-family:var(--mono);color:${s.pnl>=0?'var(--win)':'var(--loss)'}">${s.pnl>=0?'+':''}$${s.pnl.toFixed(0)}</td><td style="font-family:var(--mono);color:${s.pnl/s.n>=0?'var(--win)':'var(--loss)'}">$${(s.pnl/s.n).toFixed(0)}</td><td>${v}</td></tr>`;
   }).join('')}</tbody></table>`:'<div class="empty">Log strategy trades to see scorecard.</div>';
   document.getElementById('strat-scorecard').innerHTML=html;
 }
@@ -1593,7 +1415,6 @@ function renderProp(){
 // ── MODAL ──
 window.openModal=fid=>{
   const t=trades.find(x=>x.fid===fid);if(!t)return;
-  const sc=t.ai&&t.ai.score>=75?'var(--win)':t.ai&&t.ai.score>=50?'var(--be)':'var(--loss)';
   document.getElementById('modal-content').innerHTML=`
     <div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--bd);">
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:5px;">
@@ -1607,20 +1428,12 @@ window.openModal=fid=>{
       </div>
       <div style="font-size:12px;color:var(--mt);">${fmtDate(t.date)} · R:R ${t.rr}</div>
     </div>
-    <div style="margin-bottom:12px;"><div style="font-size:10px;color:var(--mt);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px;">Entry Logic</div><div style="font-size:13px;color:var(--mt2);line-height:1.7;padding:10px 12px;background:var(--s2);border-radius:8px;">${t.entry}</div></div>
+    <div style="margin-bottom:12px;">
+      <div style="font-size:10px;color:var(--mt);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px;">Entry Logic</div>
+      <div style="font-size:13px;color:var(--mt2);line-height:1.7;padding:10px 12px;background:var(--s2);border-radius:8px;">${t.entry}</div>
+    </div>
     ${t.mistakes?`<div style="margin-bottom:12px;"><div style="font-size:10px;color:var(--mt);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px;">Mistakes</div><div style="font-size:13px;color:var(--loss);line-height:1.7;padding:10px 12px;background:rgba(240,82,82,0.06);border-radius:8px;border-left:3px solid var(--loss);">${t.mistakes}</div></div>`:''}
     ${t.imgSrc?`<img src="${t.imgSrc}" style="width:100%;border-radius:8px;margin-bottom:12px;border:1px solid var(--bd);">`:''}
-    ${t.ai?`<div style="padding-top:12px;border-top:1px solid var(--bd);">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
-        <div class="ai-dot"></div>
-        <span style="font-family:var(--mono);font-size:12px;color:var(--ac);">MARCUS: <span style="font-size:20px;font-weight:700;color:${sc};">${t.ai.score}</span>/100</span>
-        ${t.ai.strategy_adherence!==undefined?`<span style="font-size:11px;color:var(--mt2);">Rule adherence: <span style="color:var(--ac);font-family:var(--mono);">${t.ai.strategy_adherence}%</span></span>`:''}
-      </div>
-      <div style="font-size:13px;color:var(--mt2);line-height:1.7;padding:11px 12px;background:var(--s2);border-radius:8px;border-left:3px solid var(--ac);margin-bottom:10px;">${t.ai.summary}</div>
-      ${t.ai.strategy_note?`<div style="padding:9px 12px;background:rgba(200,255,0,0.04);border-radius:8px;font-size:12px;color:var(--mt2);border-left:3px solid var(--ac);margin-bottom:8px;">Strategy: ${t.ai.strategy_note}</div>`:''}
-      ${t.ai.similarity?`<div style="padding:9px 12px;background:var(--s2);border-radius:8px;font-size:12px;color:var(--mt2);border-left:3px solid var(--be);margin-bottom:8px);">${t.ai.similarity}</div>`:''}
-      <div class="fix-list">${(t.ai.fixes||[]).map((f,i)=>`<div class="fix-item"><div class="fix-num">${i+1}</div><div>${f}</div></div>`).join('')}</div>
-    </div>`:''}
     <div style="margin-top:14px;display:flex;justify-content:flex-end;">
       <button class="btn btn-sm" style="color:var(--loss);border-color:rgba(240,82,82,0.3);" onclick="delTrade('${t.fid}')">Delete Trade</button>
     </div>`;
