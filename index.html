@@ -797,6 +797,30 @@ body{background:var(--bg);color:var(--tx);font-family:var(--sans);font-size:14px
 
 <div class="toast" id="toast"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+// Global dispatcher - module functions attach themselves here
+window._appReady = false;
+window._queue = [];
+function _dispatch(fn, args) {
+  if (window[fn]) { window[fn](...args); }
+  else { window._queue.push({fn, args}); }
+}
+// Override onclick targets to use dispatcher
+['signInWithGoogle','signOut','showPage','setType','setEmo','handleImg','clearForm',
+ 'logTrade','renderJournal','exportCSV','calcRisk','loadNews','genWeekly',
+ 'sTab','openStratModal','closeStratModal','saveStrat','delStrat','renderStratTrades',
+ 'convertRaw','copyOutput','askMentor','mQuick','clearMentor','toggleCheck',
+ 'openModal','closeModal','delTrade','saveProp','savePlan','renderProp',
+ 'shiftCal','calDayClick','saveDDLimit','saveReview','renderHabits',
+ 'handleChartUpload','chartQuick','askChartAnalyst','clearChartSession'
+].forEach(fn => {
+  window[fn] = function() {
+    const args = Array.from(arguments);
+    if (window['_real_'+fn]) window['_real_'+fn](...args);
+    else window._queue.push({fn, args});
+  };
+});
+</script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut as fbOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -821,8 +845,8 @@ let eqChart=null, donutChart=null, scoreChart=null, svdChart=null, spnlChart=nul
 let unsubTrades=null;
 
 // ── AUTH ──
-window.signInWithGoogle = async()=>{ try{await signInWithPopup(auth,new GoogleAuthProvider());}catch(e){toast('Sign in failed','error');} };
-window.signOut = async()=>{ if(unsubTrades)unsubTrades(); await fbOut(auth); };
+window._real_signInWithGoogle = async()=>{ try{await signInWithPopup(auth,new GoogleAuthProvider());}catch(e){toast('Sign in failed','error');} };
+window._real_signOut = async()=>{ if(unsubTrades)unsubTrades(); await fbOut(auth); };
 
 onAuthStateChanged(auth, async u=>{
   if(u){
@@ -861,7 +885,7 @@ function subTrades(){
 }
 
 async function saveTrade(t){ setSyncing(); try{await addDoc(collection(db,'eos_trades'),{...t,uid:user.uid});setSynced();toast('Trade saved and synced','success');}catch(e){toast('Save failed: '+e.message,'error');} }
-window.delTrade = async fid=>{ if(!confirm('Delete this trade?'))return; setSyncing(); try{await deleteDoc(doc(db,'eos_trades',fid));setSynced();closeModal();toast('Deleted','success');}catch(e){toast('Delete failed','error');} };
+window._real_delTrade = async fid=>{ if(!confirm('Delete this trade?'))return; setSyncing(); try{await deleteDoc(doc(db,'eos_trades',fid));setSynced();closeModal();toast('Deleted','success');}catch(e){toast('Delete failed','error');} };
 
 async function loadUserData(){
   if(!user)return;
@@ -871,8 +895,7 @@ async function loadUserData(){
     const ss=await getDocs(query(collection(db,'eos_strategies'),where('uid','==',user.uid)));
     strategies=ss.docs.map(d=>({...d.data(),fid:d.id}));
     if(!strategies.length){ await seedStrategies(); }
-    const pl=await getDoc(doc(db,'eos_plan',user.uid+'-'+today()));
-    if(pl.exists()){const d=pl.data();document.getElementById('plan-bias').value=d.bias||'';document.getElementById('plan-levels').value=d.levels||'';document.getElementById('plan-news').value=d.news||'';document.getElementById('plan-max').value=d.max||'';}
+
     popStratDrop();
   }catch(e){console.error(e);}
 }
@@ -883,7 +906,7 @@ async function seedStrategies(){
 }
 
 async function addStratDB(s){ const ref=await addDoc(collection(db,'eos_strategies'),{...s,uid:user.uid,createdAt:new Date().toISOString()}); strategies.push({...s,uid:user.uid,fid:ref.id}); }
-window.delStrat = async fid=>{ if(!confirm('Delete strategy?'))return; try{await deleteDoc(doc(db,'eos_strategies',fid));strategies=strategies.filter(s=>s.fid!==fid);renderPlaybook();popStratDrop();toast('Deleted','success');}catch(e){toast('Error','error');} };
+window._real_delStrat = async fid=>{ if(!confirm('Delete strategy?'))return; try{await deleteDoc(doc(db,'eos_strategies',fid));strategies=strategies.filter(s=>s.fid!==fid);renderPlaybook();popStratDrop();toast('Deleted','success');}catch(e){toast('Error','error');} };
 async function saveChecks(){ if(!user)return; try{await setDoc(doc(db,'eos_checks',user.uid),checks);}catch(e){} }
 
 // ── UTILS ──
@@ -896,7 +919,7 @@ function sessBadge(s){ return `<span class="sess-badge ${(s||'').toLowerCase()}"
 function typeBadge(t,sn){ if(t==='strategy'&&sn)return`<span class="strat-badge">${sn}</span>`;return`<span class="free-badge">Discretionary</span>`; }
 
 // ── NAV ──
-window.showPage = id=>{
+window._real_showPage = id=>{
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
@@ -909,10 +932,10 @@ window.showPage = id=>{
 };
 
 // ── FORM ──
-window.setType = type=>{ selType=type; const sb=document.getElementById('btn-type-strat'),fb=document.getElementById('btn-type-free'),w=document.getElementById('type-warn'); if(type==='strategy'){sb.classList.add('btn-ac');fb.classList.remove('btn-ac');w.style.display='none';document.getElementById('f-strat').disabled=false;}else{fb.classList.add('btn-ac');sb.classList.remove('btn-ac');w.style.display='block';document.getElementById('f-strat').disabled=true;document.getElementById('f-strat').value='';} };
-window.setEmo = e=>{ selEmo=e; document.querySelectorAll('.emo-btn').forEach(b=>b.classList.toggle('on',b.textContent.toLowerCase()===e||b.textContent.toLowerCase().includes(e))); };
-window.handleImg = input=>{ const f=input.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{const i=document.getElementById('prev-img');i.src=e.target.result;i.style.display='block';};r.readAsDataURL(f); };
-window.clearForm = ()=>{ ['f-entry','f-mistakes','f-pnl','f-rr'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';}); document.getElementById('prev-img').style.display='none'; document.getElementById('feedback-area').innerHTML=''; selEmo='calm'; document.querySelectorAll('.emo-btn').forEach(b=>b.classList.remove('on')); };
+window._real_setType = type=>{ selType=type; const sb=document.getElementById('btn-type-strat'),fb=document.getElementById('btn-type-free'),w=document.getElementById('type-warn'); if(type==='strategy'){sb.classList.add('btn-ac');fb.classList.remove('btn-ac');w.style.display='none';document.getElementById('f-strat').disabled=false;}else{fb.classList.add('btn-ac');sb.classList.remove('btn-ac');w.style.display='block';document.getElementById('f-strat').disabled=true;document.getElementById('f-strat').value='';} };
+window._real_setEmo = e=>{ selEmo=e; document.querySelectorAll('.emo-btn').forEach(b=>b.classList.toggle('on',b.textContent.toLowerCase()===e||b.textContent.toLowerCase().includes(e))); };
+window._real_handleImg = input=>{ const f=input.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{const i=document.getElementById('prev-img');i.src=e.target.result;i.style.display='block';};r.readAsDataURL(f); };
+window._real_clearForm = ()=>{ ['f-entry','f-mistakes','f-pnl','f-rr'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';}); document.getElementById('prev-img').style.display='none'; document.getElementById('feedback-area').innerHTML=''; selEmo='calm'; document.querySelectorAll('.emo-btn').forEach(b=>b.classList.remove('on')); };
 
 function popStratDrop(){
   const sel=document.getElementById('f-strat');if(!sel)return;
@@ -928,7 +951,7 @@ function popStratFilter(){
 }
 
 // ── LOG TRADE ──
-window.logTrade = async()=>{
+window._real_logTrade = async()=>{
   const pair=document.getElementById('f-pair').value;
   const dir=document.getElementById('f-dir').value;
   const outcome=document.getElementById('f-outcome').value;
@@ -1049,7 +1072,7 @@ function renderDash(){
 }
 
 // ── JOURNAL ──
-window.renderJournal=()=>{
+window._real_renderJournal=()=>{
   const pf=document.getElementById('jf-pair').value;
   const of=document.getElementById('jf-out').value;
   const tf=document.getElementById('jf-type').value;
@@ -1062,7 +1085,7 @@ window.renderJournal=()=>{
   document.getElementById('journal-list').innerHTML=ts.length===0?'<div class="empty">No trades match filter.</div>':ts.map(tradeCard).join('');
 };
 
-window.exportCSV=()=>{
+window._real_exportCSV=()=>{
   const h=['Date','Pair','Dir','Outcome','P&L','R:R','Session','Emotion','Type','Strategy','AI Score','Entry','Mistakes'];
   const rows=trades.map(t=>[t.date,t.pair,t.dir,t.outcome,t.pnl,t.rr,t.sess||'',t.emotion||'',t.tradeType||'',t.stratName||'',t.ai?.score||'',`"${t.entry.replace(/"/g,"'")}"`,`"${(t.mistakes||'').replace(/"/g,"'")}"`]);
   const csv=[h,...rows].map(r=>r.join(',')).join('\n');
@@ -1164,7 +1187,7 @@ function renderDiscChecks(){
   const done=Object.values(checks).filter(Boolean).length;
   const e=document.getElementById('disc-today');if(e)e.textContent=done+'/5';
 }
-window.toggleCheck=async k=>{checks[k]=!checks[k];await saveChecks();renderDiscChecks();};
+window._real_toggleCheck=async k=>{checks[k]=!checks[k];await saveChecks();renderDiscChecks();};
 
 function renderStreak(){
   const sorted=[...trades].sort((a,b)=>new Date(b.date)-new Date(a.date));
@@ -1182,7 +1205,7 @@ function renderStreak(){
 }
 
 // ── WEEKLY ──
-window.genWeekly=async()=>{
+window._real_genWeekly=async()=>{
   if(!trades.length){toast('No trades to analyse','error');return;}
   document.getElementById('weekly-load').classList.add('show');
   document.getElementById('weekly-content').innerHTML='';
@@ -1216,7 +1239,7 @@ window.genWeekly=async()=>{
 
 // ── STRATEGY MANAGER ──
 function renderStratPage(){ renderStratOverview(); }
-window.sTab=(id,el)=>{
+window._real_sTab=(id,el)=>{
   ['overview','trades','free','playbook'].forEach(t=>{const e=document.getElementById('stab-'+t);if(e)e.style.display='none';});
   const tgt=document.getElementById('stab-'+id);if(tgt)tgt.style.display='block';
   document.querySelectorAll('.strat-tab').forEach(b=>b.classList.remove('on'));
@@ -1261,7 +1284,7 @@ function renderStratOverview(){
   document.getElementById('strat-scorecard').innerHTML=html;
 }
 
-window.renderStratTrades=()=>{
+window._real_renderStratTrades=()=>{
   const f=document.getElementById('strat-filter')?.value||'';
   const ts=trades.filter(t=>t.tradeType==='strategy'&&t.stratName&&(f?t.stratName===f:true));
   document.getElementById('strat-trades-list').innerHTML=ts.length?ts.map(tradeCard).join(''):'<div class="empty">No strategy trades logged yet.</div>';
@@ -1308,9 +1331,9 @@ function renderPlaybook(){
   }).join('');
 }
 
-window.openStratModal=()=>document.getElementById('strat-modal-ov').classList.add('open');
-window.closeStratModal=()=>document.getElementById('strat-modal-ov').classList.remove('open');
-window.saveStrat=async()=>{
+window._real_openStratModal=()=>document.getElementById('strat-modal-ov').classList.add('open');
+window._real_closeStratModal=()=>document.getElementById('strat-modal-ov').classList.remove('open');
+window._real_saveStrat=async()=>{
   const name=document.getElementById('sm-name').value.trim();
   if(!name){toast('Enter a strategy name','error');return;}
   const s={name,market:document.getElementById('sm-market').value,tf:document.getElementById('sm-tf').value,entry:document.getElementById('sm-entry').value,sl:document.getElementById('sm-sl').value,tp:document.getElementById('sm-tp').value,inv:document.getElementById('sm-inv').value,sess:document.getElementById('sm-sess').value,cond:document.getElementById('sm-cond').value,notes:document.getElementById('sm-notes').value};
@@ -1321,7 +1344,7 @@ window.saveStrat=async()=>{
 };
 
 // ── RAW TO PRO ──
-window.convertRaw=async mode=>{
+window._real_convertRaw=async mode=>{
   const raw=document.getElementById('raw-input').value.trim();
   if(!raw){toast('Type your thoughts first','error');return;}
   document.getElementById('conv-load').classList.add('show');
@@ -1348,7 +1371,7 @@ window.convertRaw=async mode=>{
     document.getElementById('raw-output').innerHTML=`<div style="color:var(--loss);font-size:13px;">AI unavailable. Check connection.</div>`;
   }
 };
-window.copyOutput=()=>{ navigator.clipboard.writeText(convertedOut).then(()=>toast('Copied','success')); };
+window._real_copyOutput=()=>{ navigator.clipboard.writeText(convertedOut).then(()=>toast('Copied','success')); };
 
 // ── MARCUS MENTOR ──
 function buildSummary(){
@@ -1374,8 +1397,8 @@ function buildSummary(){
   return `${trades.length} trades | WR: ${wr}% | P&L: $${pnl.toFixed(0)} | Avg score: ${avgSc}/100 | Avg rule adherence: ${avgAdh}%\nStrategy: ${sT.length} trades $${sT.reduce((s,t)=>s+(t.pnl||0),0).toFixed(0)} | Discretionary: ${fT.length} trades $${fT.reduce((s,t)=>s+(t.pnl||0),0).toFixed(0)}\nBy strategy: ${setupRows||'none'}\nBy session: ${sessRows}\nBy emotion: ${emRows}\nMax consecutive losses: ${maxCL}\nLast 5 trades: ${last5}`;
 }
 
-window.askMentor=async()=>{ const q=document.getElementById('mentor-q').value.trim();if(!q)return;await callMarcus(q);document.getElementById('mentor-q').value=''; };
-window.mQuick=async type=>{
+window._real_askMentor=async()=>{ const q=document.getElementById('mentor-q').value.trim();if(!q)return;await callMarcus(q);document.getElementById('mentor-q').value=''; };
+window._real_mQuick=async type=>{
   const qs={
     strengths:'Look at my exact numbers. What are my real proven strengths as a trader? Be specific with the data.',
     weaknesses:'Do not hold back. Where exactly am I bleeding money? Give me the hard truth with exact figures.',
@@ -1409,10 +1432,10 @@ async function callMarcus(q){
     chat.innerHTML+=`<div class="mentor-msg ai" style="color:var(--loss);">AI unavailable. Check connection.</div>`;
   }
 }
-window.clearMentor=()=>{ mentorHistory=[]; document.getElementById('mentor-chat').innerHTML='<div class="empty" style="padding:40px 0;">New session started. Marcus is ready.</div>'; toast('New session','success'); };
+window._real_clearMentor=()=>{ mentorHistory=[]; document.getElementById('mentor-chat').innerHTML='<div class="empty" style="padding:40px 0;">New session started. Marcus is ready.</div>'; toast('New session','success'); };
 
 // ── RISK CALC ──
-window.calcRisk=()=>{
+window._real_calcRisk=()=>{
   const acc=parseFloat(document.getElementById('rc-acc').value)||0;
   const rp=parseFloat(document.getElementById('rc-risk').value)||0;
   const pair=document.getElementById('rc-pair').value;
@@ -1428,7 +1451,7 @@ window.calcRisk=()=>{
 };
 
 // ── NEWS ──
-window.loadNews=async()=>{
+window._real_loadNews=async()=>{
   document.getElementById('news-load').classList.add('show');
   const prompt=`Give today's major forex economic calendar events for ${new Date().toDateString()}. Return ONLY valid JSON array:\n[{"time":"<HH:MM IST>","currency":"<USD/EUR/JPY/GBP>","event":"<name>","impact":"high|medium|low","forecast":"<value>","previous":"<value>"}]\n6-8 events. Only JSON, no markdown.`;
   let events=[];
@@ -1468,7 +1491,7 @@ function renderProp(){
 }
 
 // ── MODAL ──
-window.openModal=fid=>{
+window._real_openModal=fid=>{
   const t=trades.find(x=>x.fid===fid);if(!t)return;
   const sc=t.ai&&t.ai.score>=75?'var(--win)':t.ai&&t.ai.score>=50?'var(--be)':'var(--loss)';
   document.getElementById('modal-content').innerHTML=`
@@ -1503,13 +1526,13 @@ window.openModal=fid=>{
     </div>`;
   document.getElementById('trade-modal').classList.add('open');
 };
-window.closeModal=()=>document.getElementById('trade-modal').classList.remove('open');
+window._real_closeModal=()=>document.getElementById('trade-modal').classList.remove('open');
 
 
 // ── DRAWDOWN ALERT ──
 let ddLimit = 0;
 function loadDDLimit(){ ddLimit = parseFloat(localStorage.getItem('eos_dd_limit')||'0') || 0; const el=document.getElementById('dd-limit'); if(el&&ddLimit) el.value=ddLimit; }
-window.saveDDLimit = ()=>{ ddLimit=parseFloat(document.getElementById('dd-limit').value)||0; localStorage.setItem('eos_dd_limit',ddLimit); checkDD(); };
+window._real_saveDDLimit = ()=>{ ddLimit=parseFloat(document.getElementById('dd-limit').value)||0; localStorage.setItem('eos_dd_limit',ddLimit); checkDD(); };
 function checkDD(){
   if(!ddLimit) return;
   const todayPnl=trades.filter(t=>t.date===today()).reduce((s,t)=>s+(t.pnl||0),0);
@@ -1556,8 +1579,8 @@ function renderCalendar(){
   }
   document.getElementById('cal-grid').innerHTML=html;
 }
-window.shiftCal=d=>{ calMonth2=new Date(calMonth2.getFullYear(),calMonth2.getMonth()+d,1); renderCalendar(); };
-window.calDayClick=date=>{
+window._real_shiftCal=d=>{ calMonth2=new Date(calMonth2.getFullYear(),calMonth2.getMonth()+d,1); renderCalendar(); };
+window._real_calDayClick=date=>{
   const dts=trades.filter(t=>t.date===date);
   const el=document.getElementById('cal-day-detail');
   if(!dts.length){el.style.display='none';return;}
@@ -1662,7 +1685,7 @@ function reviewQ(tid,qkey,label,saved){
     '</div></div>';
 }
 
-window.saveReview=(tid,qkey,val)=>{
+window._real_saveReview=(tid,qkey,val)=>{
   const key='eos_review_'+tid;
   const saved=JSON.parse(localStorage.getItem(key)||'null')||{};
   saved[qkey]=val;
@@ -1681,7 +1704,7 @@ function renderHabits(){
 
 // ── HOOK INTO showPage ──
 const _origShowPage = window.showPage;
-window.showPage = id => {
+window._real_showPage = id => {
   _origShowPage(id);
   if(id==='calendar') renderCalendar();
   else if(id==='habits') renderHabits();
@@ -1689,6 +1712,10 @@ window.showPage = id => {
 
 // ── HOOK INTO subTrades to check DD after every sync ──
 const _origSubTrades = subTrades;
+
+// Flush queued calls
+window._queue.forEach(({fn, args}) => { if(window['_real_'+fn]) window['_real_'+fn](...args); });
+window._queue = [];
 
 // Run DD check after trades update
 function postTradesUpdate(){
@@ -1703,7 +1730,7 @@ setTimeout(()=>{ loadDDLimit(); checkDD(); }, 2000);
 let chartImgBase64 = null;
 let chartHistory = [];
 
-window.handleChartUpload = input => {
+window._real_handleChartUpload = input => {
   const file = input.files[0]; if(!file) return;
   const reader = new FileReader();
   reader.onload = e => {
@@ -1717,7 +1744,7 @@ window.handleChartUpload = input => {
   reader.readAsDataURL(file);
 };
 
-window.clearChartSession = () => {
+window._real_clearChartSession = () => {
   chartImgBase64 = null;
   chartHistory = [];
   document.getElementById('chart-preview').style.display = 'none';
@@ -1730,7 +1757,7 @@ window.clearChartSession = () => {
   toast('Session cleared', 'success');
 };
 
-window.chartQuick = q => {
+window._real_chartQuick = q => {
   const qs = {
     full: 'Give me a complete top-down structural analysis of this chart. Cover: overall bias, key structure levels, order blocks (bullish and bearish), any FVGs, liquidity pools, and what price is most likely to do next.',
     ob: 'Identify all significant order blocks on this chart. For each one tell me: location, type (bullish/bearish), strength, and whether it has been mitigated or is still valid.',
@@ -1749,7 +1776,7 @@ window.chartQuick = q => {
   askChartAnalyst();
 };
 
-window.askChartAnalyst = async () => {
+window._real_askChartAnalyst = async () => {
   const question = document.getElementById('chart-question').value.trim();
   if (!question) { toast('Type a question first', 'error'); return; }
   if (!chartImgBase64) { toast('Upload a chart first', 'error'); return; }
