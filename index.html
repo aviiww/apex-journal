@@ -696,8 +696,8 @@ onAuthStateChanged(auth, async u=>{
 });
 
 // ── SYNC ──
-function setSyncing(){ const d=document.getElementById('sync-dot');const l=document.getElementById('sync-lbl');if(d)d.className='sync-dot syncing';if(l)l.textContent='Syncing...'; }
-function setSynced(){ const d=document.getElementById('sync-dot');const l=document.getElementById('sync-lbl');if(d)d.className='sync-dot';if(l)l.textContent='Synced'; }
+function setSyncing(){ try{const d=document.getElementById('sync-dot');const l=document.getElementById('sync-lbl');if(d)d.className='sync-dot syncing';if(l)l.textContent='Syncing...';}catch(e){} }
+function setSynced(){ try{const d=document.getElementById('sync-dot');const l=document.getElementById('sync-lbl');if(d)d.className='sync-dot';if(l)l.textContent='Synced';}catch(e){} }
 
 // ── FIRESTORE ──
 function subTrades(){
@@ -706,6 +706,8 @@ function subTrades(){
   unsubTrades=onSnapshot(q,snap=>{
     trades=snap.docs.map(d=>({...d.data(),fid:d.id}));
     setSynced(); updateCount(); renderDash(); popStratFilter();
+    // Refresh strategy dropdown every time trades sync (keeps it fresh)
+    popStratDrop();
   },e=>{ console.error(e); toast('Sync error','error'); });
 }
 
@@ -720,7 +722,12 @@ async function loadUserData(){
     const ss=await getDocs(query(collection(db,'eos_strategies'),where('uid','==',user.uid)));
     strategies=ss.docs.map(d=>({...d.data(),fid:d.id}));
     if(!strategies.length){ await seedStrategies(); }
-    popStratDrop(); // populate immediately after loading
+    popStratDrop();
+    // Subscribe to real-time strategy updates
+    onSnapshot(query(collection(db,'eos_strategies'),where('uid','==',user.uid)), snap=>{
+      strategies=snap.docs.map(d=>({...d.data(),fid:d.id}));
+      popStratDrop();
+    });
 
     popStratDrop();
   }catch(e){console.error(e);}
