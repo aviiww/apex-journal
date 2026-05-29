@@ -1575,7 +1575,7 @@ function renderCalendar(){
     if(ds===td) cls+=' today';
     else if(dts.length>0) cls+=dp>0?' win':dp<0?' loss':' flat';
     const pstr=dts.length?'<div class="cal-pnl">'+(dp>=0?'+':'')+'$'+Math.round(dp)+'</div>':'';
-    html+='<div class="'+cls+'" onclick="calDayClick(''+ds+'')">'+'<div>'+day+'</div>'+pstr+'</div>';
+    html+='<div class="'+cls+'" onclick="calDayClick(\''+ds+'\')">'+'<div>'+day+'</div>'+pstr+'</div>';
   }
   document.getElementById('cal-grid').innerHTML=html;
 }
@@ -1680,8 +1680,8 @@ function reviewQ(tid,qkey,label,saved){
   return '<div style="background:var(--s1);border-radius:8px;padding:10px;">'+
     '<div style="font-size:10px;color:var(--mt);margin-bottom:7px;line-height:1.4;">'+label+'</div>'+
     '<div style="display:flex;gap:6px;">'+
-    '<button onclick="saveReview(''+tid+'',''+qkey+'',true)" style="flex:1;padding:5px;border-radius:6px;border:1px solid '+(saved===true?'var(--win)':'var(--bd)')+';background:'+(saved===true?'rgba(34,211,160,0.15)':'var(--s2)')+';color:'+(saved===true?'var(--win)':'var(--mt)')+';font-size:11px;cursor:pointer;font-family:var(--sans);">Yes</button>'+
-    '<button onclick="saveReview(''+tid+'',''+qkey+'',false)" style="flex:1;padding:5px;border-radius:6px;border:1px solid '+(saved===false?'var(--loss)':'var(--bd)')+';background:'+(saved===false?'rgba(240,82,82,0.15)':'var(--s2)')+';color:'+(saved===false?'var(--loss)':'var(--mt)')+';font-size:11px;cursor:pointer;font-family:var(--sans);">No</button>'+
+    '<button onclick="saveReview(\''+tid+'\',\''+qkey+'\',true)" style="flex:1;padding:5px;border-radius:6px;border:1px solid '+(saved===true?'var(--win)':'var(--bd)')+';background:'+(saved===true?'rgba(34,211,160,0.15)':'var(--s2)')+';color:'+(saved===true?'var(--win)':'var(--mt)')+';font-size:11px;cursor:pointer;font-family:var(--sans);">Yes</button>'+
+    '<button onclick="saveReview(\''+tid+'\',\''+qkey+'\',false)" style="flex:1;padding:5px;border-radius:6px;border:1px solid '+(saved===false?'var(--loss)':'var(--bd)')+';background:'+(saved===false?'rgba(240,82,82,0.15)':'var(--s2)')+';color:'+(saved===false?'var(--loss)':'var(--mt)')+';font-size:11px;cursor:pointer;font-family:var(--sans);">No</button>'+
     '</div></div>';
 }
 
@@ -1849,11 +1849,8 @@ When analysing:
     // Format the reply nicely
     const formatted = reply
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/
-
-/g, '</p><p style="margin-top:10px;">')
-      .replace(/
-/g, '<br>');
+      .replace(/\n\n/g, '</p><p style="margin-top:10px;">')
+      .replace(/\n/g, '<br>');
 
     chat.innerHTML += '<div class="qa-msg ai"><p>' + formatted + '</p></div>';
     document.getElementById('chart-question').value = '';
