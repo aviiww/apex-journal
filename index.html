@@ -211,19 +211,33 @@ body{background:var(--bg);color:var(--tx);font-family:var(--sans);font-size:14px
 .pill.loss{background:rgba(240,82,82,0.12);color:var(--loss)}
 .pill.be{background:rgba(245,166,35,0.12);color:var(--be)}
 @media(max-width:768px){
-  .app{grid-template-columns:1fr}
-  .sidebar{position:fixed;bottom:0;left:0;right:0;top:auto;height:auto;flex-direction:row;padding:6px 4px;z-index:50;border-right:none;border-top:1px solid var(--bd);overflow-x:auto;overflow-y:hidden}
+  .app{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}
+  .sidebar{position:fixed;bottom:0;left:0;right:0;top:auto;height:60px;flex-direction:row;padding:4px 2px;z-index:50;border-right:none;border-top:1px solid var(--bd);overflow-x:auto;overflow-y:hidden;display:flex;align-items:center;}
   .logo,.nav-lbl,.user-sec,.sb-count-l,.sb-count-v{display:none}
-  .nav-sec{display:flex;padding:0 2px;margin:0}
-  .nav-item{flex-direction:column;gap:3px;padding:5px 8px;font-size:9px;min-width:50px;align-items:center}
-  .main{padding-bottom:68px}
-  .page{padding:14px}
-  .stats-row{grid-template-columns:repeat(2,1fr)}
-  .chart-row{grid-template-columns:1fr}
-  .form-grid{grid-template-columns:1fr}
-  .fg.full{grid-column:1}
-  .tc-body{grid-template-columns:repeat(2,1fr)}
-  .emo-grid{grid-template-columns:repeat(3,1fr)}
+  .nav-sec{display:flex;padding:0;margin:0;flex-shrink:0;}
+  .nav-item{flex-direction:column;gap:2px;padding:4px 8px;font-size:8px;min-width:48px;align-items:center;border-left:none;border-bottom:2px solid transparent;}
+  .nav-item.active{background:transparent;border-bottom-color:var(--ac);color:var(--ac);}
+  .nav-icon{width:18px;height:18px;}
+  .main{padding-bottom:72px;}
+  .page{padding:12px;}
+  .stats-row{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .chart-row{grid-template-columns:1fr;}
+  .form-grid{grid-template-columns:1fr;}
+  .fg.full{grid-column:1;}
+  .tc-body{grid-template-columns:repeat(2,1fr);}
+  .emo-grid{grid-template-columns:repeat(3,1fr);}
+  .ph{flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:14px;}
+  .pt{font-size:16px;}
+  .stat-val{font-size:18px;}
+  .strat-tabs{flex-wrap:wrap;}
+  .strat-tab{min-width:80px;font-size:10px;}
+  /* Marcus mobile */
+  #page-mentor .card{margin-bottom:10px;}
+  /* Chart analyst mobile */
+  #page-chartqa > div{grid-template-columns:1fr !important;}
+}
+@media(min-width:769px){
+  .sidebar{display:flex;flex-direction:column;}
 }
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 @keyframes bounce{0%,80%,100%{transform:scaleY(1)}40%{transform:scaleY(1.5)}}
@@ -480,7 +494,10 @@ body{background:var(--bg);color:var(--tx);font-family:var(--sans);font-size:14px
     <div class="stat-card" style="text-align:center;"><div class="stat-lbl">Best Streak</div><div class="stat-val" id="best-streak" style="font-size:36px;">0</div><div class="stat-sub">all-time</div></div>
     <div class="stat-card" style="text-align:center;"><div class="stat-lbl">Avg AI Score</div><div class="stat-val" id="avg-sc" style="font-size:36px;color:var(--ac);">—</div><div class="stat-sub">quality</div></div>
   </div>
-  <div class="card"><div class="card-t">Daily Discipline Rules</div><div id="disc-checks"></div><div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;"><div style="font-size:12px;color:var(--mt);">Discipline Score Today</div><div id="disc-today" style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--ac);">0/5</div></div></div>
+  <div class="card">
+    <div class="card-t">Today's Session</div>
+    <div id="today-session-stats"></div>
+  </div>
   <div class="card"><div class="card-t">AI Score History (last 20 trades)</div><canvas id="score-chart" height="80"></canvas></div>
 </div>
 
@@ -567,34 +584,46 @@ body{background:var(--bg);color:var(--tx);font-family:var(--sans);font-size:14px
 
 <!-- AI MENTOR -->
 <div id="page-mentor" class="page">
-  <div class="ph"><div><div class="pt">AI Mentor — Marcus</div><div class="ps">20-year prop trader. Analyses your real data. No sugarcoating.</div></div><button class="btn btn-sm" onclick="clearMentor()">New Session</button></div>
-  <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:20px;align-items:start;">
-    <div>
-      <div class="card" style="margin-bottom:14px;">
-        <div class="card-t">Ask Marcus</div>
-        <textarea class="fta" id="mentor-q" style="min-height:90px;" placeholder="Ask anything — 'Why am I losing on Fridays?', 'What is my best setup?', 'Am I ready to trade live?'"></textarea>
-        <button class="btn btn-ac" style="width:100%;margin-top:10px;" onclick="askMentor()">Ask Marcus</button>
-      </div>
-      <div class="card">
-        <div class="card-t">Quick Deep-Dives</div>
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <button class="btn" style="text-align:left;" onclick="mQuick('strengths')">What are my real strengths?</button>
-          <button class="btn" style="text-align:left;" onclick="mQuick('weaknesses')">Where exactly am I leaking money?</button>
-          <button class="btn" style="text-align:left;" onclick="mQuick('mistakes')">My most costly repeated mistakes?</button>
-          <button class="btn" style="text-align:left;" onclick="mQuick('plan')">Give me a 30-day improvement plan</button>
-          <button class="btn" style="text-align:left;" onclick="mQuick('psychology')">What does my data say about my psychology?</button>
-          <button class="btn" style="text-align:left;" onclick="mQuick('strategy')">Which strategy to focus on or drop?</button>
-          <button class="btn" style="text-align:left;" onclick="mQuick('full')">Full performance review — don't hold back</button>
-        </div>
-      </div>
+  <div class="ph">
+    <div><div class="pt">AI Mentor — Marcus</div><div class="ps">Upload a chart or ask anything. Real data. No sugarcoating.</div></div>
+    <button class="btn btn-sm" onclick="clearMentor()">New Session</button>
+  </div>
+  <div class="card" style="margin-bottom:14px;min-height:320px;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--bd);">
+      <div class="ai-dot"></div>
+      <span style="font-family:var(--mono);font-size:12px;color:var(--ac);font-weight:700;">MARCUS — AI TRADING MENTOR</span>
     </div>
-    <div class="card" style="min-height:480px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--bd);">
-        <div class="ai-dot"></div>
-        <span style="font-family:var(--mono);font-size:13px;color:var(--ac);font-weight:700;">MARCUS — AI TRADING MENTOR</span>
+    <div class="ai-load" id="mentor-load"><div class="ld"><div class="ld-dot"></div><div class="ld-dot"></div><div class="ld-dot"></div></div><span class="ld-txt">Marcus is thinking...</span></div>
+    <div id="mentor-chat" style="flex:1;overflow-y:auto;max-height:380px;padding-right:4px;">
+      <div class="empty" style="padding:30px 0;">Ask anything — trading data, chart analysis, psychology, hi hello.<br><span style="font-size:11px;color:var(--mt);">Upload a chart and Marcus reads the structure too.</span></div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--bd);flex-wrap:wrap;">
+      <div id="mentor-chart-thumb" style="display:none;position:relative;">
+        <img id="mentor-chart-img" style="width:60px;height:44px;object-fit:cover;border-radius:6px;border:1px solid var(--bd2);" alt="">
+        <button onclick="removeMentorChart()" style="position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;background:var(--loss);border:none;color:#fff;font-size:9px;cursor:pointer;line-height:1;">x</button>
       </div>
-      <div class="ai-load" id="mentor-load"><div class="ld"><div class="ld-dot"></div><div class="ld-dot"></div><div class="ld-dot"></div></div><span class="ld-txt">Marcus is reviewing your data...</span></div>
-      <div id="mentor-chat"><div class="empty" style="padding:40px 0;">Ask a question or pick a quick deep-dive.<br><span style="font-size:11px;">Marcus analyses your real trade data.</span></div></div>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:7px 12px;border:1px solid var(--bd);border-radius:8px;font-size:12px;color:var(--mt2);background:var(--s2);">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+        Upload Chart
+        <input type="file" id="mentor-chart-file" accept="image/*" style="display:none;" onchange="handleMentorChart(this)">
+      </label>
+      <span style="font-size:11px;color:var(--mt);">Upload any chart — Marcus reads market structure</span>
+    </div>
+    <textarea class="fta" id="mentor-q" style="min-height:72px;margin-bottom:10px;" placeholder="Ask anything — chart structure, order blocks, liquidity, your trading data, or just say hi..."></textarea>
+    <button class="btn btn-ac" style="width:100%;" onclick="askMentor()">Ask Marcus</button>
+  </div>
+  <div class="card">
+    <div class="card-t">Quick Deep-Dives</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+      <button class="btn" style="text-align:left;font-size:12px;" onclick="mQuick('strengths')">My real strengths?</button>
+      <button class="btn" style="text-align:left;font-size:12px;" onclick="mQuick('weaknesses')">Where am I leaking money?</button>
+      <button class="btn" style="text-align:left;font-size:12px;" onclick="mQuick('mistakes')">My costliest mistakes?</button>
+      <button class="btn" style="text-align:left;font-size:12px;" onclick="mQuick('plan')">30-day improvement plan</button>
+      <button class="btn" style="text-align:left;font-size:12px;" onclick="mQuick('psychology')">My psychology issues?</button>
+      <button class="btn" style="text-align:left;font-size:12px;" onclick="mQuick('strategy')">Which strategy to drop?</button>
+      <button class="btn" style="text-align:left;font-size:12px;grid-column:1/-1;" onclick="mQuick('full')">Full performance review</button>
     </div>
   </div>
 </div>
@@ -838,8 +867,7 @@ onAuthStateChanged(auth, async u=>{
     await loadUserData();
     subTrades();
     loadNews();
-    renderDiscChecks();
-  } else {
+    } else {
     user=null;
     document.getElementById('auth-screen').style.display='flex';
     document.getElementById('app-screen').style.display='none';
@@ -959,7 +987,7 @@ async function rateWithAI(pair,dir,outcome,pnl,rr,entry,mistakes,sess,emo,strat,
   const stratInfo=strat?`Strategy: ${strat.name}. Entry rules: ${strat.entry}. SL rule: ${strat.sl}. TP rule: ${strat.tp}. Invalidation: ${strat.inv}.`:'No strategy tagged — discretionary trade.';
   const typeNote=type==='free'?'NOTE: Discretionary trade with no strategy. Be extra critical — did this have any real edge?':'Strategy trade — assess how well they followed their rules.';
   const prompt=`You are Marcus, a veteran prop trader and mentor. Rate this trade. Return ONLY valid JSON, no markdown.\n\n${typeNote}\n${stratInfo}\n\nTrade: ${pair} ${dir} | Outcome: ${outcome} | P&L: $${pnl} | R:R: ${rr} | Session: ${sess} | Emotion: ${emo}\nEntry: "${entry}"\nMistakes: "${mistakes||'None'}"\nSimilar past trades: ${sim}\n\nReturn ONLY:\n{"score":<0-100>,"summary":"<2-3 direct sentences referencing actual entry and strategy rules>","fixes":["<fix1>","<fix2>","<fix3>"],"tags":{"good":["<g1>"],"bad":["<b1>"],"warn":["<w1>"]},"breakdown":{"entry_quality":<0-100>,"rr_discipline":<0-100>,"risk_management":<0-100>,"psychology":<0-100>,"execution":<0-100>},"similarity":"<1 sentence vs past trades>","strategy_adherence":<0-100>,"strategy_note":"<1 sentence on rule adherence>"}`;
-  const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:900,messages:[{role:'user',content:prompt}]})});
+  const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-allow-browser':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:900,messages:[{role:'user',content:prompt}]})});
   const data=await res.json();
   return JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());
 }
@@ -1165,7 +1193,43 @@ function renderDiscChecks(){
 }
 window.toggleCheck=async k=>{checks[k]=!checks[k];await saveChecks();renderDiscChecks();};
 
+function renderTodayStats(){
+  const el = document.getElementById('today-session-stats');
+  if(!el) return;
+  const todayT = trades.filter(t=>t.date===today());
+  const todayPnl = todayT.reduce((s,t)=>s+(t.pnl||0),0);
+  const todayW = todayT.filter(t=>t.outcome==='Win').length;
+  const todayL = todayT.filter(t=>t.outcome==='Loss').length;
+  if(!todayT.length){
+    el.innerHTML='<div style="text-align:center;padding:20px;color:var(--mt);font-size:13px;">No trades today yet.<br><span style="font-size:11px;">Start logging your sessions.</span></div>';
+    return;
+  }
+  el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;">
+    <div style="text-align:center;padding:12px;background:var(--s2);border-radius:8px;">
+      <div style="font-size:10px;color:var(--mt);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">P&L Today</div>
+      <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:${todayPnl>=0?'var(--win)':'var(--loss)'};">${todayPnl>=0?'+':''}$${todayPnl.toFixed(0)}</div>
+    </div>
+    <div style="text-align:center;padding:12px;background:var(--s2);border-radius:8px;">
+      <div style="font-size:10px;color:var(--mt);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">Trades</div>
+      <div style="font-family:var(--mono);font-size:20px;font-weight:700;">${todayT.length}</div>
+    </div>
+    <div style="text-align:center;padding:12px;background:var(--s2);border-radius:8px;">
+      <div style="font-size:10px;color:var(--mt);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">W / L</div>
+      <div style="font-family:var(--mono);font-size:20px;font-weight:700;"><span style="color:var(--win);">${todayW}</span> / <span style="color:var(--loss);">${todayL}</span></div>
+    </div>
+  </div>
+  ${todayT.map(t=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bd);">
+    <div style="display:flex;gap:7px;align-items:center;">
+      <span class="pair-badge">${t.pair}</span>
+      <span class="dir-badge ${t.dir.toLowerCase()}">${t.dir}</span>
+      <span style="font-size:11px;color:var(--mt2);">${t.stratName||'Discretionary'}</span>
+    </div>
+    <span style="font-family:var(--mono);font-weight:700;color:${t.pnl>=0?'var(--win)':'var(--loss)'};">${t.pnl>=0?'+':''}$${t.pnl}</span>
+  </div>`).join('')}`;
+}
+
 function renderStreak(){
+  renderTodayStats();
   const sorted=[...trades].sort((a,b)=>new Date(b.date)-new Date(a.date));
   let cur=0;for(const t of sorted){if(t.outcome==='Win')cur++;else break;}
   let best=0,tmp=0;[...trades].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(t=>{if(t.outcome==='Win'){tmp++;if(tmp>best)best=tmp;}else tmp=0;});
@@ -1174,7 +1238,6 @@ function renderStreak(){
   const scs=trades.filter(t=>t.ai?.score).map(t=>t.ai.score);
   const avgSc=scs.length?Math.round(scs.reduce((a,b)=>a+b,0)/scs.length):null;
   document.getElementById('avg-sc').textContent=avgSc!==null?avgSc:'—';
-  renderDiscChecks();
   const recent=trades.filter(t=>t.ai?.score).slice(0,20).reverse();
   if(scoreChart)scoreChart.destroy();
   if(recent.length>1)scoreChart=new Chart(document.getElementById('score-chart'),{type:'line',data:{labels:recent.map(t=>t.pair),datasets:[{data:recent.map(t=>t.ai.score),borderColor:'#c8ff00',backgroundColor:'rgba(200,255,0,0.05)',tension:0.3,fill:true,pointRadius:4,pointBackgroundColor:recent.map(t=>t.ai.score>=70?'#22d3a0':t.ai.score>=50?'#f5a623':'#f05252')}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#6b6b80',font:{size:10}}},x:{ticks:{color:'#6b6b80',font:{size:10}},grid:{display:false}}}}});
@@ -1193,7 +1256,7 @@ window.genWeekly=async()=>{
   const summary=recent.map(t=>`${t.date}|${t.pair} ${t.dir}|${t.outcome}|$${t.pnl}|RR:${t.rr}|${t.sess||'?'}|${t.emotion||'?'}|Score:${t.ai?.score||'?'}|Type:${t.tradeType||'?'}|Strategy:${t.stratName||'none'}|${t.entry.substring(0,50)}`).join('\n');
   const prompt=`You are Marcus, veteran prop trader and coach. Analyse this trader's log. Return ONLY valid JSON.\n\nLog:\n${summary}\n\nStrategy P&L: $${sPnl.toFixed(0)} (${sT.length} trades) | Discretionary P&L: $${fPnl.toFixed(0)} (${fT.length} trades)\n\nReturn ONLY:\n{"grade":"<A/B/C/D/F>","score":<0-100>,"pnl_analysis":"<2-3 sentences with numbers>","best":"<what is working with data>","worst":"<biggest problem with data>","psychology":"<precise psychological observation>","strategy_vs_free":"<compare with exact numbers>","best_session":"<with WR and P&L>","emotion_warning":"<which emotion costs most with figures>","focus":["<specific action 1>","<specific action 2>","<specific action 3>"]}`;
   let r;
-  try{const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1100,system:'You are Marcus, veteran prop trader. Be specific, data-driven, brutally honest. Reference exact numbers.',messages:[{role:'user',content:prompt}]})});const data=await res.json();r=JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());}
+  try{const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-allow-browser':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1100,system:'You are Marcus, veteran prop trader. Be specific, data-driven, brutally honest. Reference exact numbers.',messages:[{role:'user',content:prompt}]})});const data=await res.json();r=JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());}
   catch(e){r={grade:'N/A',score:0,pnl_analysis:'AI unavailable.',best:'—',worst:'—',psychology:'—',strategy_vs_free:'—',best_session:'—',emotion_warning:'—',focus:[]};}
   document.getElementById('weekly-load').classList.remove('show');
   const gc={'A':'var(--win)','B':'var(--win)','C':'var(--be)','D':'var(--loss)','F':'var(--loss)'}[r.grade]||'var(--mt)';
@@ -1335,7 +1398,7 @@ window.convertRaw=async mode=>{
     lesson:`Extract the core lesson. Format: THE PROBLEM | ROOT CAUSE | THE RULE (add to trading plan) | IMPLEMENTATION (how to apply going forward)`
   };
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:900,system:'You convert raw emotional trader notes into professional journal language. Never add information not in the original. Never soften or remove important facts. Only improve language and structure.',messages:[{role:'user',content:prompts[mode]+'\n\nRaw text:\n"'+raw+'"'}]})});
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-allow-browser':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:900,system:'You convert raw emotional trader notes into professional journal language. Never add information not in the original. Never soften or remove important facts. Only improve language and structure.',messages:[{role:'user',content:prompts[mode]+'\n\nRaw text:\n"'+raw+'"'}]})});
     const data=await res.json();
     const reply=data.content[0].text||'Conversion failed.';
     convertedOut=reply;
@@ -1389,49 +1452,112 @@ window.mQuick=async type=>{
   document.getElementById('mentor-q').value='';
 };
 
-async function callMarcus(q){
-  document.getElementById('mentor-load').classList.add('show');
-  const chat=document.getElementById('mentor-chat');
-  chat.innerHTML+=`<div class="mentor-msg user">${q}</div>`;
-  mentorHistory.push({role:'user',content:'TRADER DATA:\n'+buildSummary()+'\n\nQUESTION: '+q});
-  if(mentorHistory.length>12)mentorHistory=mentorHistory.slice(-12);
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,system:`You are Marcus, a veteran prop firm trader and head coach with 20 years experience turning retail traders into profitable professionals.\n\nYour style:\n- BRUTALLY HONEST. No sugarcoating. Bad numbers get called out directly.\n- DATA-DRIVEN. Every point references their actual statistics — specific numbers, percentages, dollar amounts.\n- SPECIFIC. Concrete actions, not vague advice. "Stop trading FOMO setups, they have cost you $340 at 22% WR" not "work on emotions."\n- You notice patterns they cannot see — tilt sequences, time-based losses, emotional correlations.\n- You remember earlier conversation and reference it.\n- You end each response with ONE sharp accountability question.\n- When strategy vs discretionary data differs significantly, you call it out.\n\nFormat: Direct 1-2 sentence assessment → numbered points with specific data → one accountability question.`,messages:mentorHistory})});
-    const data=await res.json();
-    const reply=data.content?.[0]?.text||'No response.';
-    mentorHistory.push({role:'assistant',content:reply});
-    document.getElementById('mentor-load').classList.remove('show');
-    chat.innerHTML+=`<div class="mentor-msg ai" style="white-space:pre-wrap;">${reply}</div>`;
-    chat.scrollTop=chat.scrollHeight;
-  }catch(e){
-    document.getElementById('mentor-load').classList.remove('show');
-    chat.innerHTML+=`<div class="mentor-msg ai" style="color:var(--loss);">AI unavailable. Check connection.</div>`;
-  }
-}
-window.clearMentor=()=>{ mentorHistory=[]; document.getElementById('mentor-chat').innerHTML='<div class="empty" style="padding:40px 0;">New session started. Marcus is ready.</div>'; toast('New session','success'); };
+let mentorChartBase64 = null;
 
-// ── RISK CALC ──
-window.calcRisk=()=>{
-  const acc=parseFloat(document.getElementById('rc-acc').value)||0;
-  const rp=parseFloat(document.getElementById('rc-risk').value)||0;
-  const pair=document.getElementById('rc-pair').value;
-  const sl=parseFloat(document.getElementById('rc-sl').value)||0;
-  if(!acc||!rp||!sl){document.getElementById('calc-result').style.display='none';return;}
-  const dr=acc*(rp/100);
-  const pv={XAUUSD:10,US30:1,EURUSD:10,USDJPY:9}[pair]||10;
-  const lots=(dr/(sl*pv));
-  document.getElementById('calc-result').style.display='block';
-  document.getElementById('calc-lots').textContent=lots.toFixed(2)+' lots';
-  document.getElementById('calc-risk-d').textContent='$'+dr.toFixed(2);
-  document.getElementById('calc-rr-d').textContent='$'+(dr*2).toFixed(2);
+window.handleMentorChart = input => {
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    mentorChartBase64 = e.target.result;
+    const img = document.getElementById('mentor-chart-img');
+    if(img) img.src = mentorChartBase64;
+    const thumb = document.getElementById('mentor-chart-thumb');
+    if(thumb) thumb.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
 };
 
+window.removeMentorChart = () => {
+  mentorChartBase64 = null;
+  const thumb = document.getElementById('mentor-chart-thumb');
+  const img = document.getElementById('mentor-chart-img');
+  const file = document.getElementById('mentor-chart-file');
+  if(thumb) thumb.style.display = 'none';
+  if(img) img.src = '';
+  if(file) file.value = '';
+};
+
+async function callMarcus(q) {
+  document.getElementById('mentor-load').classList.add('show');
+  const chat = document.getElementById('mentor-chat');
+
+  const chartNote = mentorChartBase64 ? ' <span style="font-size:10px;color:var(--ac);background:rgba(200,255,0,0.1);padding:2px 6px;border-radius:10px;">+chart</span>' : '';
+  chat.innerHTML += `<div class="mentor-msg user">${q}${chartNote}</div>`;
+  chat.scrollTop = chat.scrollHeight;
+
+  let msgContent;
+  if (mentorChartBase64) {
+    const base64Data = mentorChartBase64.split(',')[1];
+    const mType = mentorChartBase64.match(/data:(image\/\w+);/)[1];
+    msgContent = [
+      { type: 'image', source: { type: 'base64', media_type: mType, data: base64Data } },
+      { type: 'text', text: 'MY TRADING STATS:\n' + buildSummary() + '\n\nQUESTION: ' + q }
+    ];
+  } else {
+    msgContent = 'MY TRADING STATS:\n' + buildSummary() + '\n\nQUESTION: ' + q;
+  }
+
+  mentorHistory.push({ role: 'user', content: msgContent });
+  if (mentorHistory.length > 14) mentorHistory = mentorHistory.slice(-14);
+
+  const marcusSystem = `You are Marcus, a senior prop firm trader and mentor with 20 years of experience. You are also an expert ICT chart analyst.
+
+When answering about trading performance data: reference exact stats, be direct and honest, give specific actionable advice, end with one accountability question.
+
+When analysing charts: read market structure (HH/HL/LH/LL, BOS, CHoCH), identify order blocks, FVGs, liquidity pools. Answer questions like "will price reach X before Y" with clear structural reasoning. State your bias confidently.
+
+For casual messages (hi, hello, how are you etc): respond naturally and warmly, then offer to help with trading.
+
+Always be specific. Reference the actual data or chart, not generic concepts.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-allow-browser': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1400,
+        system: marcusSystem,
+        messages: mentorHistory
+      })
+    });
+
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+    const reply = data.content?.[0]?.text || 'No response.';
+    mentorHistory.push({ role: 'assistant', content: reply });
+    document.getElementById('mentor-load').classList.remove('show');
+
+    const formatted = reply.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+    chat.innerHTML += `<div class="mentor-msg ai">${formatted}</div>`;
+
+    if (mentorChartBase64) removeMentorChart();
+    chat.scrollTop = chat.scrollHeight;
+
+  } catch(e) {
+    document.getElementById('mentor-load').classList.remove('show');
+    chat.innerHTML += `<div class="mentor-msg ai" style="color:var(--loss);">Error: ${e.message}<br><span style="font-size:11px;">Open console (F12) to see details.</span></div>`;
+    console.error('Marcus error:', e);
+  }
+}
+
+window.clearMentor = () => {
+  mentorHistory = [];
+  removeMentorChart();
+  const chat = document.getElementById('mentor-chat');
+  if(chat) chat.innerHTML = '<div class="empty" style="padding:30px 0;">New session. Marcus is ready.<br><span style="font-size:11px;color:var(--mt);">Ask anything or upload a chart.</span></div>';
+  toast('New session', 'success');
+};
 // ── NEWS ──
 window.loadNews=async()=>{
   document.getElementById('news-load').classList.add('show');
   const prompt=`Give today's major forex economic calendar events for ${new Date().toDateString()}. Return ONLY valid JSON array:\n[{"time":"<HH:MM IST>","currency":"<USD/EUR/JPY/GBP>","event":"<name>","impact":"high|medium|low","forecast":"<value>","previous":"<value>"}]\n6-8 events. Only JSON, no markdown.`;
   let events=[];
-  try{const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:700,messages:[{role:'user',content:prompt}]})});const data=await res.json();events=JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());}
+  try{const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-allow-browser':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:700,messages:[{role:'user',content:prompt}]})});const data=await res.json();events=JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());}
   catch(e){events=[{time:'N/A',currency:'USD',event:'AI unavailable — check forexfactory.com',impact:'high',forecast:'—',previous:'—'}];}
   document.getElementById('news-load').classList.remove('show');
   const hi=events.filter(e=>e.impact==='high');
