@@ -987,7 +987,7 @@ async function rateWithAI(pair,dir,outcome,pnl,rr,entry,mistakes,sess,emo,strat,
   const stratInfo=strat?`Strategy: ${strat.name}. Entry rules: ${strat.entry}. SL rule: ${strat.sl}. TP rule: ${strat.tp}. Invalidation: ${strat.inv}.`:'No strategy tagged — discretionary trade.';
   const typeNote=type==='free'?'NOTE: Discretionary trade with no strategy. Be extra critical — did this have any real edge?':'Strategy trade — assess how well they followed their rules.';
   const prompt=`You are Marcus, a veteran prop trader and mentor. Rate this trade. Return ONLY valid JSON, no markdown.\n\n${typeNote}\n${stratInfo}\n\nTrade: ${pair} ${dir} | Outcome: ${outcome} | P&L: $${pnl} | R:R: ${rr} | Session: ${sess} | Emotion: ${emo}\nEntry: "${entry}"\nMistakes: "${mistakes||'None'}"\nSimilar past trades: ${sim}\n\nReturn ONLY:\n{"score":<0-100>,"summary":"<2-3 direct sentences referencing actual entry and strategy rules>","fixes":["<fix1>","<fix2>","<fix3>"],"tags":{"good":["<g1>"],"bad":["<b1>"],"warn":["<w1>"]},"breakdown":{"entry_quality":<0-100>,"rr_discipline":<0-100>,"risk_management":<0-100>,"psychology":<0-100>,"execution":<0-100>},"similarity":"<1 sentence vs past trades>","strategy_adherence":<0-100>,"strategy_note":"<1 sentence on rule adherence>"}`;
-  const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-allow-browser':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:900,messages:[{role:'user',content:prompt}]})});
+  const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:900,messages:[{role:'user',content:prompt}]})});
   const data=await res.json();
   return JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());
 }
@@ -1256,7 +1256,7 @@ window.genWeekly=async()=>{
   const summary=recent.map(t=>`${t.date}|${t.pair} ${t.dir}|${t.outcome}|$${t.pnl}|RR:${t.rr}|${t.sess||'?'}|${t.emotion||'?'}|Score:${t.ai?.score||'?'}|Type:${t.tradeType||'?'}|Strategy:${t.stratName||'none'}|${t.entry.substring(0,50)}`).join('\n');
   const prompt=`You are Marcus, veteran prop trader and coach. Analyse this trader's log. Return ONLY valid JSON.\n\nLog:\n${summary}\n\nStrategy P&L: $${sPnl.toFixed(0)} (${sT.length} trades) | Discretionary P&L: $${fPnl.toFixed(0)} (${fT.length} trades)\n\nReturn ONLY:\n{"grade":"<A/B/C/D/F>","score":<0-100>,"pnl_analysis":"<2-3 sentences with numbers>","best":"<what is working with data>","worst":"<biggest problem with data>","psychology":"<precise psychological observation>","strategy_vs_free":"<compare with exact numbers>","best_session":"<with WR and P&L>","emotion_warning":"<which emotion costs most with figures>","focus":["<specific action 1>","<specific action 2>","<specific action 3>"]}`;
   let r;
-  try{const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-allow-browser':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1100,system:'You are Marcus, veteran prop trader. Be specific, data-driven, brutally honest. Reference exact numbers.',messages:[{role:'user',content:prompt}]})});const data=await res.json();r=JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());}
+  try{const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1100,system:'You are Marcus, veteran prop trader. Be specific, data-driven, brutally honest. Reference exact numbers.',messages:[{role:'user',content:prompt}]})});const data=await res.json();r=JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());}
   catch(e){r={grade:'N/A',score:0,pnl_analysis:'AI unavailable.',best:'—',worst:'—',psychology:'—',strategy_vs_free:'—',best_session:'—',emotion_warning:'—',focus:[]};}
   document.getElementById('weekly-load').classList.remove('show');
   const gc={'A':'var(--win)','B':'var(--win)','C':'var(--be)','D':'var(--loss)','F':'var(--loss)'}[r.grade]||'var(--mt)';
@@ -1398,7 +1398,7 @@ window.convertRaw=async mode=>{
     lesson:`Extract the core lesson. Format: THE PROBLEM | ROOT CAUSE | THE RULE (add to trading plan) | IMPLEMENTATION (how to apply going forward)`
   };
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-allow-browser':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:900,system:'You convert raw emotional trader notes into professional journal language. Never add information not in the original. Never soften or remove important facts. Only improve language and structure.',messages:[{role:'user',content:prompts[mode]+'\n\nRaw text:\n"'+raw+'"'}]})});
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:900,system:'You convert raw emotional trader notes into professional journal language. Never add information not in the original. Never soften or remove important facts. Only improve language and structure.',messages:[{role:'user',content:prompts[mode]+'\n\nRaw text:\n"'+raw+'"'}]})});
     const data=await res.json();
     const reply=data.content[0].text||'Conversion failed.';
     convertedOut=reply;
@@ -1511,12 +1511,10 @@ For casual messages (hi, hello, how are you etc): respond naturally and warmly, 
 Always be specific. Reference the actual data or chart, not generic concepts.`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/chat', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-allow-browser': 'true'
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
@@ -1557,7 +1555,7 @@ window.loadNews=async()=>{
   document.getElementById('news-load').classList.add('show');
   const prompt=`Give today's major forex economic calendar events for ${new Date().toDateString()}. Return ONLY valid JSON array:\n[{"time":"<HH:MM IST>","currency":"<USD/EUR/JPY/GBP>","event":"<name>","impact":"high|medium|low","forecast":"<value>","previous":"<value>"}]\n6-8 events. Only JSON, no markdown.`;
   let events=[];
-  try{const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-allow-browser':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:700,messages:[{role:'user',content:prompt}]})});const data=await res.json();events=JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());}
+  try{const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:700,messages:[{role:'user',content:prompt}]})});const data=await res.json();events=JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());}
   catch(e){events=[{time:'N/A',currency:'USD',event:'AI unavailable — check forexfactory.com',impact:'high',forecast:'—',previous:'—'}];}
   document.getElementById('news-load').classList.remove('show');
   const hi=events.filter(e=>e.impact==='high');
@@ -1906,7 +1904,7 @@ window.askChartAnalyst = async () => {
   if (chartHistory.length > 14) chartHistory = chartHistory.slice(-14);
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
