@@ -685,7 +685,7 @@ onAuthStateChanged(auth, async u=>{
     document.getElementById('user-av').src=u.photoURL||'';
     document.getElementById('dash-date').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
     document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
-    document.getElementById('plan-date').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',day:'2-digit',month:'long'});
+    // plan page removed
     await loadUserData();
     subTrades();
     } else {
