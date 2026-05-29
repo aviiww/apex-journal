@@ -340,7 +340,7 @@ body{background:var(--bg);color:var(--tx);font-family:var(--sans);font-size:14px
 
 <!-- LOG TRADE -->
 <div id="page-log" class="page">
-  <div class="ph"><div><div class="pt">Log Trade</div><div class="ps">AI mentor rates it instantly</div></div></div>
+  <div class="ph"><div><div class="pt">Log Trade</div><div class="ps">Log every trade with full detail</div></div></div>
   <div class="card">
     <!-- TRADE TYPE -->
     <div style="margin-bottom:18px;">
@@ -720,6 +720,7 @@ async function loadUserData(){
     const ss=await getDocs(query(collection(db,'eos_strategies'),where('uid','==',user.uid)));
     strategies=ss.docs.map(d=>({...d.data(),fid:d.id}));
     if(!strategies.length){ await seedStrategies(); }
+    popStratDrop(); // populate immediately after loading
 
     popStratDrop();
   }catch(e){console.error(e);}
@@ -766,6 +767,14 @@ function popStratDrop(){
   const sel=document.getElementById('f-strat');if(!sel)return;
   sel.innerHTML='<option value="">-- Select Strategy --</option>';
   strategies.forEach(s=>{const o=document.createElement('option');o.value=s.name;o.textContent=s.name;sel.appendChild(o);});
+  // Also refresh the strat filter dropdown
+  const fsel=document.getElementById('strat-filter');
+  if(fsel){
+    const cur=fsel.value;
+    fsel.innerHTML='<option value="">All Strategies</option>';
+    strategies.forEach(s=>{const o=document.createElement('option');o.value=s.name;o.textContent=s.name;fsel.appendChild(o);});
+    fsel.value=cur;
+  }
 }
 function popStratFilter(){
   const sel=document.getElementById('strat-filter');if(!sel)return;
